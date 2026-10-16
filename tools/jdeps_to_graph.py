@@ -21,11 +21,23 @@ most classes land in a small central blob, so they are a starting point for a
 layout, not final block positions. The script prints span and gap statistics
 for each axis so that distortion can be judged.
 
+Hub classes such as BlockPos, BlockState and Level connect to almost everything,
+so leaf classes that only use them all land on the same spot of the embedding.
+To stop that, --hub-cutoff drops the top 2% of classes by degree (about 130
+classes with degree 138 or more) before the embedding. The remaining classes are
+embedded and clustered, then each dropped class joins the cluster that holds
+most of its neighbors and takes the mean of their coordinates. Classes that the
+cut leaves stranded outside the main component are assigned the same way.
+--dims defaults to the cluster count because k-means on k eigenvectors is the
+standard spectral clustering recipe; with fewer eigenvectors the largest
+cluster grew to 723 classes.
+
 Requires numpy only. Usage:
 
-  python3 tools/jdeps_to_graph.py [--k 40] [--dims 8] [--raw-laplacian]
+  python3 tools/jdeps_to_graph.py [--k 40] [--dims 40] [--hub-cutoff 2] [--raw-laplacian]
 
 Written by Claude Code; conversation transcript: llm/transcripts/transcript_2026-10-16_07-43_2aec7285-4ea5-4d89-ba3e-f516a9a7bde0.md
+Written by Claude Code; conversation transcript: llm/transcripts/transcript_2026-10-16_21-13_7be25610-1bcb-41cd-837b-f496e52cab5a.md
 """
 from __future__ import annotations
 
@@ -89,7 +101,8 @@ def spectral_embedding(adj: list[set[int]], members: list[int], dims: int, raw: 
     W = np.zeros((m, m), dtype=np.float32)
     for u in members:
         for v in adj[u]:
-            W[sub[u], sub[v]] = 1.0
+            if v in sub:
+                W[sub[u], sub[v]] = 1.0
     deg = W.sum(axis=1)
     t0 = time.time()
     if raw:
@@ -123,6 +136,70 @@ def kmeans(X: np.ndarray, k: int, iters: int = 100, seed: int = 0) -> np.ndarray
             break
         C = newC
     return lab
+
+
+def pick_hubs(adj: list[set[int]], members: list[int], percent: float) -> set[int]:
+    """Return the top `percent` of `members` by degree. Ties keep the lower index."""
+    count = int(round(len(members) * percent / 100.0))
+    ranked = sorted(members, key=lambda i: (-len(adj[i]), i))
+    return set(ranked[:count])
+
+
+def largest_component(adj: list[set[int]], keep: set[int]) -> list[int]:
+    """Return the largest connected component of the graph restricted to `keep`."""
+    seen: set[int] = set()
+    best: list[int] = []
+    for s in sorted(keep):
+        if s in seen:
+            continue
+        comp = [s]
+        seen.add(s)
+        stack = [s]
+        while stack:
+            u = stack.pop()
+            for v in adj[u]:
+                if v in keep and v not in seen:
+                    seen.add(v)
+                    comp.append(v)
+                    stack.append(v)
+        if len(comp) > len(best):
+            best = comp
+    return sorted(best)
+
+
+def assign_by_neighbors(adj: list[set[int]], cluster: list[int], coords: list, pending: list[int]) -> None:
+    """Give every node in `pending` the cluster most of its labeled neighbors have.
+
+    Nodes are visited from highest to lowest degree; a node whose neighbors are
+    all unlabeled waits for the next pass. Its coordinates become the mean of the
+    labeled neighbors' coordinates. Both lists are changed in place.
+    """
+    todo = sorted(pending, key=lambda i: -len(adj[i]))
+    while todo:
+        rest = []
+        for u in todo:
+            votes = collections.Counter(cluster[v] for v in adj[u] if cluster[v] != -1)
+            if not votes:
+                rest.append(u)
+                continue
+            cluster[u] = votes.most_common(1)[0][0]
+            pts = np.array([coords[v] for v in adj[u] if coords[v] is not None])
+            coords[u] = tuple(pts.mean(axis=0))
+        if len(rest) == len(todo):
+            raise RuntimeError(f"{len(rest)} nodes have no labeled neighbors")
+        todo = rest
+
+
+def report_clusters(names: list[str], members: list[int], cluster: list[int], k: int) -> None:
+    """Print purity against depth-3 packages and the cluster size range."""
+    by_cluster: dict[int, list[str]] = collections.defaultdict(list)
+    for i in members:
+        by_cluster[cluster[i]].append(package(names[i], 3))
+    purity = sum(collections.Counter(v).most_common(1)[0][1] for v in by_cluster.values())
+    sizes = sorted(len(v) for v in by_cluster.values())
+    print(f"\nk-means k={k}: purity against depth-3 packages = {purity / len(members):.3f}")
+    print(f"cluster sizes: min={sizes[0]} median={sizes[len(sizes) // 2]} max={sizes[-1]}; "
+          f"{sum(1 for s in sizes if s > 300)} clusters above 300")
 
 
 def axis_stats(X: np.ndarray) -> None:
@@ -164,9 +241,12 @@ def main() -> None:
     ap.add_argument("--in-dir", default=ROOT / "jdeps-output", type=pathlib.Path)
     ap.add_argument("--out-dir", default=ROOT / "graph-data", type=pathlib.Path)
     ap.add_argument("--k", type=int, default=40, help="number of k-means clusters")
-    ap.add_argument("--dims", type=int, default=8, help="eigenvectors used for clustering")
+    ap.add_argument("--dims", type=int, default=40, help="eigenvectors used for clustering (match it to --k)")
     ap.add_argument("--raw-laplacian", action="store_true",
                     help="use the unnormalized Laplacian (hubs dominate; for comparison only)")
+    ap.add_argument("--hub-cutoff", type=float, default=2.0, metavar="PERCENT",
+                    help="drop the top PERCENT of classes by degree before the embedding, cluster the rest, "
+                         "then give each dropped class the cluster most of its neighbors have (0 = off)")
     ap.add_argument("--seed", type=int, default=0)
     args = ap.parse_args()
 
@@ -187,7 +267,15 @@ def main() -> None:
           f"largest={main_size} orphans (degree 0)={orphans}", flush=True)
 
     members = [i for i in range(n) if comp[i] == main_comp]
-    X, lap_vals, deg = spectral_embedding(adj, members, args.dims, args.raw_laplacian)
+    embedded = members
+    if args.hub_cutoff > 0:
+        hubs = pick_hubs(adj, members, args.hub_cutoff)
+        embedded = largest_component(adj, set(members) - hubs)
+        min_hub_deg = min(len(adj[i]) for i in hubs)
+        print(f"hub cutoff {args.hub_cutoff}%: dropped {len(hubs)} hubs (degree >= {min_hub_deg}); "
+              f"{len(members) - len(hubs) - len(embedded)} more classes were stranded; "
+              f"embedding {len(embedded)} classes", flush=True)
+    X, lap_vals, deg = spectral_embedding(adj, embedded, args.dims, args.raw_laplacian)
     print("smallest Laplacian eigenvalues:", np.round(lap_vals, 4))
     axis_stats(X)
 
@@ -195,17 +283,13 @@ def main() -> None:
     lab = kmeans(Xn, args.k, seed=args.seed)
     cluster = [-1] * n
     coords: list[tuple[float, float, float] | None] = [None] * n
-    for row, i in enumerate(members):
+    for row, i in enumerate(embedded):
         cluster[i] = int(lab[row])
         coords[i] = (X[row, 0], X[row, 1], X[row, 2])
+    if len(embedded) < len(members):
+        assign_by_neighbors(adj, cluster, coords, [i for i in members if cluster[i] == -1])
 
-    keys3 = [package(names[i], 3) for i in members]
-    purity = 0
-    for j in range(args.k):
-        in_j = [keys3[row] for row in range(len(members)) if lab[row] == j]
-        if in_j:
-            purity += collections.Counter(in_j).most_common(1)[0][1]
-    print(f"\nk-means k={args.k}: purity against depth-3 packages = {purity / len(members):.3f}")
+    report_clusters(names, members, cluster, args.k)
 
     args.out_dir.mkdir(parents=True, exist_ok=True)
     with open(args.out_dir / "nodes.csv", "w", newline="") as f:
