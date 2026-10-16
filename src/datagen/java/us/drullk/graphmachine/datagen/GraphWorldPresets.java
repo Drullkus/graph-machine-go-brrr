@@ -26,7 +26,7 @@ public final class GraphWorldPresets {
     public static void bootstrap(BootstrapContext<WorldPreset> context) {
         HolderGetter<DimensionType> dimensionTypes = context.lookup(Registries.DIMENSION_TYPE);
         HolderGetter<Biome> biomes = context.lookup(Registries.BIOME);
-        LevelStem overworld = new LevelStem(dimensionTypes.getOrThrow(BuiltinDimensionTypes.OVERWORLD), new GraphChunkGenerator(biomes.getOrThrow(Biomes.THE_VOID)));
+        LevelStem overworld = new LevelStem(dimensionTypes.getOrThrow(BuiltinDimensionTypes.OVERWORLD), new GraphChunkGenerator(biomes.getOrThrow(Biomes.PLAINS)));
         context.register(GraphPresets.GRAPH, new WorldPreset(Map.of(LevelStem.OVERWORLD, overworld)));
     }
 }

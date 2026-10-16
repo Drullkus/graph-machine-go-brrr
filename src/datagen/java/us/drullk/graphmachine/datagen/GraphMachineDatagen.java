@@ -25,6 +25,6 @@ public final class GraphMachineDatagen {
         pack.createWorldRegistryObjects(new RegistrySetBuilder().add(Registries.WORLD_PRESET, GraphWorldPresets::bootstrap));
         pack.createProvider(GraphWorldPresetTagsProvider::new);
         pack.createProvider(GraphLanguageProvider::new);
-        pack.createProvider(GraphDataProvider::new);
+        pack.createProvider((output, _) -> new GraphDataProvider(output, 2, 4));
     }
 }

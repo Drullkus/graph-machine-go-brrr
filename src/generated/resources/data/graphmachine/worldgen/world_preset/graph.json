@@ -4,7 +4,7 @@
       "type": "minecraft:overworld",
       "generator": {
         "type": "graphmachine:graph",
-        "biome": "minecraft:the_void"
+        "biome": "minecraft:plains"
       }
     }
   }

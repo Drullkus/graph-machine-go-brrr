@@ -51,8 +51,8 @@ import us.drullk.graphmachine.graph.GraphNode;
  * <p>Written by Claude Code; conversation transcript: {@code llm/transcripts/transcript_2026-10-16_07-43_2aec7285-4ea5-4d89-ba3e-f516a9a7bde0.md}.
  */
 public class GraphChunkGenerator extends ChunkGenerator {
-    public static final int DEFAULT_FLOOR_Y = 48;
-    public static final int DEFAULT_GRAPH_Y = 64;
+    public static final int DEFAULT_FLOOR_Y = 64;
+    public static final int DEFAULT_GRAPH_Y = 128;
     private static final int MIN_Y = -64;
     private static final int HEIGHT = 384;
 
@@ -81,7 +81,7 @@ public class GraphChunkGenerator extends ChunkGenerator {
 
     /** A generator with the default floor and heights. */
     public GraphChunkGenerator(Holder<Biome> biome) {
-        this(biome, Blocks.CONCRETE.pick(DyeColor.BLACK).defaultBlockState(), DEFAULT_FLOOR_Y, DEFAULT_GRAPH_Y);
+        this(biome, Blocks.CONCRETE.black().defaultBlockState(), DEFAULT_FLOOR_Y, DEFAULT_GRAPH_Y);
     }
 
     @Override

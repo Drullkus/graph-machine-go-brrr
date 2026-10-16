@@ -30,15 +30,19 @@ public final class GraphDataProvider implements DataProvider {
     public static final String INPUT_PROPERTY = "graphmachine.graphData";
 
     private final PackOutput output;
+    private final float posScalarHorizontal;
+    private final float posScalarVertical;
 
-    public GraphDataProvider(PackOutput output) {
+    public GraphDataProvider(PackOutput output, float posScalarHorizontal, float posScalarVertical) {
         this.output = output;
+        this.posScalarHorizontal = posScalarHorizontal;
+        this.posScalarVertical = posScalarVertical;
     }
 
     @Override
     public CompletableFuture<?> run(CachedOutput cache) {
         Path inputDir = Path.of(System.getProperty(INPUT_PROPERTY, "graph-data"));
-        GraphData data = read(inputDir.resolve("nodes.csv"), inputDir.resolve("layout.csv"));
+        GraphData data = read(inputDir.resolve("nodes.csv"), inputDir.resolve("layout.csv"), this.posScalarHorizontal, this.posScalarVertical);
         Path target = this.output.getOutputFolder(PackOutput.Target.DATA_PACK)
                 .resolve(GraphDataLoader.FILE.getNamespace())
                 .resolve(GraphDataLoader.FILE.getPath());
@@ -51,7 +55,7 @@ public final class GraphDataProvider implements DataProvider {
     }
 
     /** Reads both CSV files and joins them on the class name. */
-    static GraphData read(Path nodesCsv, Path layoutCsv) {
+    static GraphData read(Path nodesCsv, Path layoutCsv, float posScalarHorizontal, float posScalarVertical) {
         Map<String, float[]> positions = new HashMap<>();
         for (String[] row : rows(layoutCsv)) {
             positions.put(row[0], new float[] {Float.parseFloat(row[1]), Float.parseFloat(row[2]), Float.parseFloat(row[3])});
@@ -65,7 +69,7 @@ public final class GraphDataProvider implements DataProvider {
                 continue;
             }
             GraphNode.Side side = row[1].equals("client") ? GraphNode.Side.CLIENT : GraphNode.Side.COMMON;
-            nodes.add(new GraphNode(className, position[0], position[1], position[2], Integer.parseInt(row[4]), side, Integer.parseInt(row[2])));
+            nodes.add(new GraphNode(className, position[0] * posScalarHorizontal, position[1] * posScalarVertical, position[2] * posScalarHorizontal, Integer.parseInt(row[4]), side, Integer.parseInt(row[2])));
         }
         nodes.sort(Comparator.comparing(GraphNode::className));
         return new GraphData(nodes);
