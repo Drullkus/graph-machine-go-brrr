@@ -34,6 +34,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.RandomState;
 import net.minecraft.world.level.levelgen.blending.Blender;
 import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
+import net.neoforged.neoforge.common.util.ConcatenatedListView;
 import org.joml.Vector3f;
 import org.jspecify.annotations.Nullable;
 import us.drullk.graphmachine.graph.GraphData;
@@ -63,8 +64,14 @@ public class GraphChunkGenerator extends ChunkGenerator {
             Codec.INT.optionalFieldOf("graph_y", DEFAULT_GRAPH_Y).forGetter(g -> g.graphY)
     ).apply(i, i.stable(GraphChunkGenerator::new)));
 
-    /** The sixteen concrete colors in dye order. A cluster id picks its color with {@code cluster mod 16}. */
-    private static final List<Block> CLUSTER_BLOCKS = Blocks.CONCRETE.asList();
+    /** A variety of blocks, in dye order */
+    private static final List<Block> CLUSTER_BLOCKS = ConcatenatedListView.of(
+            Blocks.WOOL.asList(),
+            Blocks.CONCRETE.asList(),
+            Blocks.CONCRETE_POWDER.asList(),
+            Blocks.DYED_TERRACOTTA.asList(),
+            Blocks.GLAZED_TERRACOTTA.asList()
+    );
 
     private final Holder<Biome> biome;
     private final BlockState floor;
