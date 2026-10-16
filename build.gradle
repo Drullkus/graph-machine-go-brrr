@@ -23,7 +23,15 @@ sourceSets.main.resources {
 
     // Exclude common development only resources from finalized outputs
     exclude("**/*.bbmodel") // BlockBench project files
-    exclude("src/generated/**/.cache") // datagen cache files
+    exclude(".cache/**") // datagen cache files; the pattern is relative to the resource root
+}
+
+// Datagen lives in its own source set, so the jar task never packs it into the mod jar.
+sourceSets {
+    datagen {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
 }
 
 repositories {
@@ -41,8 +49,11 @@ neoForge {
     // Specify the version of NeoForge to use.
     version = project.neo_version
 
-    // This line is optional. Access Transformers are automatically detected
-    // accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
+    // Opens the private setters of the display entities for the graph chunk generator.
+    accessTransformers = project.files('src/main/resources/META-INF/accesstransformer.cfg')
+
+    // Give the datagen source set the same Minecraft and NeoForge dependencies as main.
+    addModdingDependenciesTo sourceSets.datagen
 
     // Default run configurations.
     // These can be tweaked, removed, or duplicated as needed.
@@ -69,6 +80,10 @@ neoForge {
 
         data {
             clientData()
+            // The datagen classes only exist on this run's classpath.
+            sourceSet = sourceSets.datagen
+            // Where the graph data provider reads the CSV files written by tools/layout_graph.py.
+            systemProperty 'graphmachine.graphData', file('graph-data').absolutePath
             // example of overriding the workingDirectory set in configureEach above, uncomment if you want to use it
             // gameDirectory = project.file('run-data')
 
@@ -98,6 +113,7 @@ neoForge {
         // multi mod projects should define one per mod
         "${mod_id}" {
             sourceSet(sourceSets.main)
+            sourceSet(sourceSets.datagen)
         }
     }
 }

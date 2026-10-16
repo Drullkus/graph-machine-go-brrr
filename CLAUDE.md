@@ -44,6 +44,13 @@ The class graph is computed offline, never in the running game.
 2. `python3 tools/jdeps_to_graph.py` reads those files, computes a spectral embedding and k-means clusters, and writes `graph-data/nodes.csv`, `graph-data/clusters.csv` and `graph-data/cluster-edges.csv`. It needs only `numpy`. Pass `--k` to change the cluster count and `--help` for the rest.
 3. Nested classes are collapsed into their outer class and `package-info` is dropped. Classes with no edges stay in the node list on purpose.
 4. `python3 tools/layout_graph.py` reads `graph-data/nodes.csv`, `graph-data/cluster-edges.csv` and `jdeps-output/class-edges.tsv`, runs a two-level force-directed layout (cluster discs first, then classes inside them with edge springs, grid repulsion and cluster gravity) and writes `graph-data/layout.csv` with columns `class,x,y,z` in block units, `y` vertical. No two classes end closer than 1 block, the main layout spans about 240 blocks, and the 13 isolated classes sit on a ring outside it. It runs in about 20 seconds and needs only `numpy`. Pass `--spacing`, `--gravity`, `--vscale` or `--seed` to change the look and `--help` for the rest.
+5. `./gradlew runData` joins `graph-data/nodes.csv` and `graph-data/layout.csv` into `src/generated/resources/data/graphmachine/graph/nodes.json`, and also writes the `graphmachine:graph` world preset, its `#minecraft:extended` tag entry and the lang file. Re-run it after every change to the CSV files and commit the result.
+
+## In-game rendering
+
+- `GraphDataLoader` reads `nodes.json` when server data packs load; `GraphChunkGenerator` places one block display and one text display per node during biome decoration, so the entities are saved with the chunk.
+- The world preset `graphmachine:graph` is in `#minecraft:extended`. In the world creation screen, hold Alt while cycling the world type to reach it.
+- Display entity setters are private in vanilla. `src/main/resources/META-INF/accesstransformer.cfg` opens the ones the generator needs; add new entries there instead of using reflection.
 
 ## Datagen
 
