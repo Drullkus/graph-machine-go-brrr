@@ -19,7 +19,7 @@ NeoForge mod that turns `minecraft.jar` class dependencies into a graph that's n
 
 The repository owner cites AI-generated work, so every session Claude works in must follow these steps.
 
-1. Transcripts live at `llm/transcripts/transcript_{start date, UTC}_{session uuid}.md` and are generated only by the owner, never on Claude's own initiative.
+1. Transcripts live at `llm/transcripts/transcript_{start date, UTC}_{HH-MM, UTC}_{session uuid}.md` and are generated only by the owner, never on Claude's own initiative.
 2. Generate one with `python3 llm/tools/claude_transcript_to_md.py` from the repo root; it picks the most recent session for this project and names the file itself.
 3. A session may span several commits, so re-run the same command whenever the owner asks for an update and commit the changed transcript alongside the code; Git tracks its history.
 4. Every class Claude creates or modifies gets a class-level Javadoc line `<p>Written by Claude Code; conversation transcript: {@code llm/transcripts/transcript-....md}.` using the repo-relative path (a modified class that already cites an earlier transcript keeps that line and gains one for the new session).

@@ -15,7 +15,7 @@ and the context the harness injects into prompts (system reminders), so the resu
 record of the human/AI exchange rather than a dump of internal metadata.
 
 By default the transcript is written to
-    llm/transcripts/transcript-<start date, UTC>-<session uuid>.md
+    llm/transcripts/transcript_<start date, UTC>_<HH-MM, UTC>_<session uuid>.md
 inside the project. If the desktop app resumed the conversation into a new session uuid (it copies
 the whole history into a fresh file), the previously exported file for the same conversation is
 renamed to the new uuid and every reference to the old path in the project's text files is rewritten.
@@ -272,8 +272,8 @@ def export(path: Path, include_results: bool, max_chars: int, self_path: str | N
 
 def default_relative_path(summary: dict) -> Path:
     started = parse_ts(summary["start"])
-    date = started.strftime("%Y-%m-%d") if started else "unknown-date"
-    return TRANSCRIPT_DIR / f"transcript_{date}_{summary['id']}.md"
+    stamp = started.strftime("%Y-%m-%d_%H-%M") if started else "unknown-date"
+    return TRANSCRIPT_DIR / f"transcript_{stamp}_{summary['id']}.md"
 
 
 def find_superseded(project: Path, summary: dict, new_rel: Path) -> Path | None:
@@ -290,7 +290,7 @@ def find_superseded(project: Path, summary: dict, new_rel: Path) -> Path | None:
     if not date:
         return None
     needle = summary["first_prompt"][:300]
-    for candidate in sorted(directory.glob(f"transcript-{date}-*.md")):
+    for candidate in sorted(directory.glob(f"transcript_{date}_*.md")):
         if candidate.name == new_rel.name:
             continue
         try:
@@ -336,7 +336,7 @@ def main(argv: list[str]) -> int:
     sel.add_argument("--session", help="session transcript UUID, or a unique prefix of it")
     sel.add_argument("--latest", action="store_true", help="export the most recently modified session (default)")
     sel.add_argument("--file", type=Path, help="export this JSONL file directly")
-    ap.add_argument("-o", "--out", type=Path, help="output file; '-' for stdout (default: llm/transcripts/transcript-<date>-<uuid>.md)")
+    ap.add_argument("-o", "--out", type=Path, help="output file; '-' for stdout (default: llm/transcripts/transcript_<date>_<HH-MM>_<uuid>.md)")
     ap.add_argument("--include-results", action="store_true", help="include tool results, truncated")
     ap.add_argument("--max-chars", type=int, default=4000, help="truncate commands, file contents and results to this many characters (0 = no limit)")
     args = ap.parse_args(argv)

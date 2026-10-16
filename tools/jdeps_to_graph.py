@@ -25,7 +25,7 @@ Requires numpy only. Usage:
 
   python3 tools/jdeps_to_graph.py [--k 40] [--dims 8] [--raw-laplacian]
 
-Written by Claude Code; conversation transcript: llm/transcripts/transcript_2026-10-16_5c2c690e-3be6-49dd-9724-3b112e8d00c0.md
+Written by Claude Code; conversation transcript: llm/transcripts/transcript_2026-10-16_07-43_5c2c690e-3be6-49dd-9724-3b112e8d00c0.md
 """
 from __future__ import annotations
 
