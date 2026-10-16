@@ -36,6 +36,14 @@ The repository owner cites AI-generated work, so every session Claude works in m
 - `--include-results` embeds truncated tool output; `--max-chars N` changes the truncation limit (0 = unlimited); `-o <file>` or `-o -` overrides the destination.
 - Sessions are read from `~/.claude/projects/<project path with slashes replaced by dashes>/*.jsonl`; the desktop app's `local_…` session handle is not a file name.
 
+## Graph data pipeline
+
+The class graph is computed offline, never in the running game.
+
+1. `./jdeps-minecraft.sh` runs `jdeps` on the patched Minecraft jar and writes `jdeps-output/class-edges.tsv` (one edge between top-level classes per line) and `jdeps-output/class-nodes.tsv` (every top-level class with its `client` or `common` dist). The raw `.dot` files in that folder are not tracked by git. The jar only exists after a Gradle sync.
+2. `python3 tools/jdeps_to_graph.py` reads those files, computes a spectral embedding and k-means clusters, and writes `graph-data/nodes.csv`, `graph-data/clusters.csv` and `graph-data/cluster-edges.csv`. It needs only `numpy`. Pass `--k` to change the cluster count and `--help` for the rest.
+3. Nested classes are collapsed into their outer class and `package-info` is dropped. Classes with no edges stay in the node list on purpose.
+
 ## Datagen
 
 - Datagen classes must stay in a separate (`src/datagen`) source set and never packed into the mod jar.
