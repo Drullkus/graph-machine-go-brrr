@@ -2,6 +2,10 @@
 
 NeoForge mod that turns `minecraft.jar` class dependencies into a graph that's navigable in-game.
 
+## Planning
+
+If the user asks you to plan, please use AskUserQuestions to ensure that all details are exhaustively chosen by the user. Leave nothing to assumption by you.
+
 ## Versions
 
 - Minecraft 26.3
