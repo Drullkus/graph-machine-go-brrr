@@ -49,7 +49,7 @@ The class graph is computed offline, never in the running game.
 
 - Datagen classes must stay in a separate (`src/datagen`) source set and never packed into the mod jar.
 - `./gradlew runData` writes into `src/generated/resources` (included in the jar). Commit the generated JSON.
-- `assets/noodling/lang/en_us.json` must stay generated.
+- `assets/graphmachine/lang/en_us.json` must stay generated.
 
 ## Tests
 
