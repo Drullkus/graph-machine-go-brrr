@@ -11,6 +11,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
 import net.minecraft.util.Mth;
@@ -159,12 +160,17 @@ public class GraphChunkGenerator extends ChunkGenerator {
             level.addFreshEntity(block);
         }
 
-        Display.TextDisplay text = EntityTypes.TEXT_DISPLAY.create(serverLevel, EntitySpawnReason.CHUNK_GENERATION);
-        if (text != null) {
-            text.setPos(x, y + scale / 2.0F + 0.25, z);
-            text.setText(Component.literal(node.simpleName()).withStyle(node.side() == GraphNode.Side.CLIENT ? ChatFormatting.AQUA : ChatFormatting.WHITE));
-            text.setBillboardConstraints(Display.BillboardConstraints.CENTER);
-            level.addFreshEntity(text);
+        this.addText(level, serverLevel, Component.literal(node.packageName()).withStyle(ChatFormatting.GRAY), x, y + scale / 2.0F + 0.75, z);
+        this.addText(level, serverLevel, Component.literal(node.simpleName()).withStyle(node.side() == GraphNode.Side.CLIENT ? ChatFormatting.AQUA : ChatFormatting.WHITE), x, y + scale / 2.0F + 0.25, z);
+    }
+
+    private void addText(WorldGenLevel level, ServerLevel serverLevel, MutableComponent textComponent, double x, double y, double z) {
+        Display.TextDisplay textEntity = EntityTypes.TEXT_DISPLAY.create(serverLevel, EntitySpawnReason.CHUNK_GENERATION);
+        if (textEntity != null) {
+            textEntity.setPos(x, y, z);
+            textEntity.setText(textComponent);
+            textEntity.setBillboardConstraints(Display.BillboardConstraints.CENTER);
+            level.addFreshEntity(textEntity);
         }
     }
 
