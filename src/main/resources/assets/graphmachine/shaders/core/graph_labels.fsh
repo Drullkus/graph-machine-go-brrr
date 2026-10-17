@@ -13,11 +13,11 @@ layout(location = 0) out vec4 fragColor;
 
 void main() {
     // A grayscale page keeps coverage in red; a colored page keeps it in alpha with white color.
-    vec4 sample = texture(Sampler0, texCoord0);
+    vec4 samplePos = texture(Sampler0, texCoord0);
     if (GraphInts.y == 1) {
-        sample = sample.rrrr;
+        samplePos = samplePos.rrrr;
     }
-    vec4 color = sample * vertexColor;
+    vec4 color = samplePos * vertexColor;
     if (color.a < 0.5) {
         discard;
     }
