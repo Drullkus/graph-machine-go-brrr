@@ -48,7 +48,7 @@ public final class GraphPipelines {
             .addAttribute("LineOffset", GpuFormat.R32_FLOAT)
             .build();
 
-    /** One edge: both end positions, both end colors, both compacted node indices, pixel width. 44 bytes. */
+    /** One edge: both end positions, both end colors, both compacted node indices, pixel width, both end cube sizes. 52 bytes. */
     public static final VertexFormat EDGE_FORMAT = VertexFormat.builder(1)
             .addAttribute("EdgeA", GpuFormat.RGB32_FLOAT)
             .addAttribute("EdgeB", GpuFormat.RGB32_FLOAT)
@@ -56,6 +56,7 @@ public final class GraphPipelines {
             .addAttribute("ColorB", GpuFormat.RGBA8_UNORM)
             .addAttribute("EdgeNodes", GpuFormat.RG32_SINT)
             .addAttribute("EdgeWidth", GpuFormat.R32_FLOAT)
+            .addAttribute("EdgeScales", GpuFormat.RG32_FLOAT)
             .build();
 
     /** Vertices per node instance: a cube of 12 triangles. */

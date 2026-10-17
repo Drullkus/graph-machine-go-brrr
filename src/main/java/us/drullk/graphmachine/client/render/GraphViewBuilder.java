@@ -38,7 +38,7 @@ public final class GraphViewBuilder {
 
     private static final int NODE_STRIDE = 20;
     private static final int GLYPH_STRIDE = 56;
-    private static final int EDGE_STRIDE = 44;
+    private static final int EDGE_STRIDE = 52;
     private static final int CANCEL_CHECK_INTERVAL = 2048;
 
     private static final int NAME_COLOR_COMMON = 0xFFFFFFFF;
@@ -76,14 +76,22 @@ public final class GraphViewBuilder {
         GraphClusters clusters = this.assets.clusters();
         List<String> terms = this.settings.filterTerms();
 
+        boolean[] visible = new boolean[nodes.size()];
+        for (int i = 0; i < nodes.size(); i++) {
+            this.checkCancelled();
+            visible[i] = this.isVisible(nodes.get(i), terms);
+        }
+        if (this.settings.includeAdjacent() && !terms.isEmpty()) {
+            this.addAdjacent(visible, nodes);
+        }
+
         int[] compact = new int[nodes.size()];
         int visibleCount = 0;
         int nameChars = 0;
         int packageChars = 0;
         for (int i = 0; i < nodes.size(); i++) {
-            this.checkCancelled();
-            GraphNode node = nodes.get(i);
-            if (this.isVisible(node, terms)) {
+            if (visible[i]) {
+                GraphNode node = nodes.get(i);
                 compact[i] = visibleCount++;
                 nameChars += node.simpleName().length();
                 packageChars += node.packageName().length();
@@ -161,6 +169,23 @@ public final class GraphViewBuilder {
         );
     }
 
+    /** Marks every node that shares an edge with a visible node, unless its cluster is hidden. */
+    private void addAdjacent(boolean[] visible, List<GraphNode> nodes) {
+        boolean[] matches = visible.clone();
+        GraphEdges edges = this.assets.edges();
+        for (int e = 0; e < edges.count(); e++) {
+            this.checkCancelled();
+            int a = edges.nodeA(e);
+            int b = edges.nodeB(e);
+            if (matches[a] && !this.settings.hiddenClusters().contains(nodes.get(b).cluster())) {
+                visible[b] = true;
+            }
+            if (matches[b] && !this.settings.hiddenClusters().contains(nodes.get(a).cluster())) {
+                visible[a] = true;
+            }
+        }
+    }
+
     private boolean isVisible(GraphNode node, List<String> terms) {
         if (this.settings.hiddenClusters().contains(node.cluster())) {
             return false;
@@ -214,6 +239,7 @@ public final class GraphViewBuilder {
             putColor(buffer, ARGB.color(NODE_EDGE_ALPHA, clusters.color(nodeB.cluster())));
             buffer.putInt(ca).putInt(cb);
             buffer.putFloat(NODE_EDGE_WIDTH);
+            buffer.putFloat(nodeScale(nodeA.degree())).putFloat(nodeScale(nodeB.degree()));
             count++;
         }
         return count;
@@ -278,6 +304,7 @@ public final class GraphViewBuilder {
             putColor(buffer, ARGB.color(CLUSTER_EDGE_ALPHA, list.get(sb).color()));
             buffer.putInt(-1).putInt(-1);
             buffer.putFloat((float) Math.min(MAX_CLUSTER_EDGE_WIDTH, 1.0 + Math.log(entry.getIntValue()) / Math.log(2.0)));
+            buffer.putFloat(0.0F).putFloat(0.0F);
             count++;
         }
         return count;

@@ -26,8 +26,8 @@ import us.drullk.graphmachine.graph.GraphCluster;
 /**
  * The ImGui inspector window on the right side of the screen and the splitter on its left edge.
  *
- * <p>The window is pinned to the panel strip and cannot be moved. From top to bottom: the filter box,
- * the package label and edge dropdowns, the hovered class, a collapsible list of cluster checkboxes with
+ * <p>The window is pinned to the panel strip and cannot be moved. From top to bottom: the filter box
+ * with the adjacent-nodes checkbox, the package label and edge dropdowns, the hovered class, a collapsible list of cluster checkboxes with
  * color swatches, and a footer pinned to the bottom that shows the apply progress or the drawn counts.
  * Every edit goes straight into {@link GraphSettingsStore}; the renderer picks the change up on the
  * next frame. Dragging the splitter changes the width when the mouse is released.
@@ -138,6 +138,12 @@ public final class GraphPanel {
             String text = this.filterBuffer.get();
             GraphSettingsStore.update(settings -> settings.withFilter(text));
         }
+        this.checkbox.set(GraphSettingsStore.current().includeAdjacent());
+        if (ImGui.checkbox("Include adjacent nodes", this.checkbox)) {
+            boolean include = this.checkbox.get();
+            GraphSettingsStore.update(settings -> settings.withIncludeAdjacent(include));
+        }
+        ImGui.separator();
 
         ImGui.setNextItemWidth(px(170));
         if (ImGui.combo("Package labels", this.packageIndex, GraphViewSettings.PackageMode.LABELS)) {

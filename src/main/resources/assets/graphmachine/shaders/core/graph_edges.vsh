@@ -13,6 +13,9 @@ layout(location = 2) in vec4 ColorA;
 layout(location = 3) in vec4 ColorB;
 layout(location = 4) in ivec2 EdgeNodes;
 layout(location = 5) in float EdgeWidth;
+// Cube edge lengths of both end nodes; the segment is shortened so it starts and ends on the cube faces
+// instead of piercing out of them. Zero for cluster edges.
+layout(location = 6) in vec2 EdgeScales;
 
 layout(location = 0) out vec4 vertexColor;
 
@@ -25,9 +28,19 @@ void main() {
     float end = (corner >= 2) ? 1.0 : 0.0;
     float side = ((corner & 1) == 1) ? 1.0 : -1.0;
 
+    vec3 worldA = EdgeA;
+    vec3 worldB = EdgeB;
+    vec3 along = worldB - worldA;
+    float edgeLength = length(along);
+    if (edgeLength > 0.0001) {
+        along /= edgeLength;
+        worldA += along * min(EdgeScales.x * 0.5, edgeLength * 0.45);
+        worldB -= along * min(EdgeScales.y * 0.5, edgeLength * 0.45);
+    }
+
     mat4 viewProj = ProjMat * ModelViewMat;
-    vec4 clipA = viewProj * vec4(EdgeA - CameraPosScale.xyz, 1.0);
-    vec4 clipB = viewProj * vec4(EdgeB - CameraPosScale.xyz, 1.0);
+    vec4 clipA = viewProj * vec4(worldA - CameraPosScale.xyz, 1.0);
+    vec4 clipB = viewProj * vec4(worldB - CameraPosScale.xyz, 1.0);
 
     // Pull an endpoint that sits behind the camera onto the near plane so the segment stays straight.
     if (clipA.w < NEAR_W && clipB.w >= NEAR_W) {
