@@ -4,7 +4,6 @@ import com.mojang.renderpearl.api.GpuFormat;
 import com.mojang.renderpearl.api.pipeline.BindGroupLayout;
 import com.mojang.renderpearl.api.pipeline.BlendFunction;
 import com.mojang.renderpearl.api.pipeline.ColorTargetState;
-import com.mojang.renderpearl.api.pipeline.CompareOp;
 import com.mojang.renderpearl.api.pipeline.DepthStencilState;
 import com.mojang.renderpearl.api.pipeline.PrimitiveTopology;
 import com.mojang.renderpearl.api.pipeline.RenderPipeline;
@@ -94,7 +93,9 @@ public final class GraphPipelines {
             .withVertexShader(id("core/graph_edges"))
             .withFragmentShader(id("core/graph_edges"))
             .withVertexBinding(0, EDGE_FORMAT)
-            .withDepthStencilState(new DepthStencilState(CompareOp.GREATER_THAN_OR_EQUAL, false))
+            // Edges blend, but they also write depth: a nearer edge then hides the edges behind it whatever the
+            // draw order, instead of a later far edge painting over a near one.
+            .withDepthStencilState(DepthStencilState.DEFAULT)
             .withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
             .build();
 

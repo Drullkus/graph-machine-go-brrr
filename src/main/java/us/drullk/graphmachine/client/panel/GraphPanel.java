@@ -27,7 +27,7 @@ import us.drullk.graphmachine.graph.GraphCluster;
  * The ImGui inspector window on the right side of the screen and the splitter on its left edge.
  *
  * <p>The window is pinned to the panel strip and cannot be moved. From top to bottom: the filter box
- * with the adjacent-nodes checkbox, the package label and edge dropdowns, the hovered class, a collapsible list of cluster checkboxes with
+ * with the adjacent-nodes dropdown, the package label and edge dropdowns, the hovered class, a collapsible list of cluster checkboxes with
  * color swatches, and a footer pinned to the bottom that shows the apply progress or the drawn counts.
  * Every edit goes straight into {@link GraphSettingsStore}; the renderer picks the change up on the
  * next frame. Dragging the splitter changes the width when the mouse is released.
@@ -45,6 +45,7 @@ public final class GraphPanel {
 
     private final GraphRenderer renderer;
     private final ImString filterBuffer = new ImString(FILTER_CAPACITY);
+    private final ImInt adjacentIndex = new ImInt();
     private final ImInt packageIndex = new ImInt();
     private final ImInt edgeIndex = new ImInt();
     private final ImBoolean checkbox = new ImBoolean();
@@ -98,6 +99,7 @@ public final class GraphPanel {
         if (!this.filterBuffer.get().equals(settings.filter())) {
             this.filterBuffer.set(settings.filter());
         }
+        this.adjacentIndex.set(settings.adjacentMode().ordinal());
         this.packageIndex.set(settings.packageMode().ordinal());
         this.edgeIndex.set(settings.edgeMode().ordinal());
     }
@@ -138,10 +140,10 @@ public final class GraphPanel {
             String text = this.filterBuffer.get();
             GraphSettingsStore.update(settings -> settings.withFilter(text));
         }
-        this.checkbox.set(GraphSettingsStore.current().includeAdjacent());
-        if (ImGui.checkbox("Include adjacent nodes", this.checkbox)) {
-            boolean include = this.checkbox.get();
-            GraphSettingsStore.update(settings -> settings.withIncludeAdjacent(include));
+        ImGui.setNextItemWidth(-1);
+        if (ImGui.combo("##adjacent", this.adjacentIndex, GraphViewSettings.AdjacentMode.LABELS)) {
+            GraphViewSettings.AdjacentMode mode = GraphViewSettings.AdjacentMode.values()[this.adjacentIndex.get()];
+            GraphSettingsStore.update(settings -> settings.withAdjacentMode(mode));
         }
         ImGui.separator();
 

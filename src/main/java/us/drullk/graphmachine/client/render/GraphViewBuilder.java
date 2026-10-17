@@ -22,7 +22,8 @@ import us.drullk.graphmachine.graph.GraphNode;
  * reads immutable data and writes into fresh direct buffers.
  *
  * <p>A node is visible when its cluster is not hidden and its full class name contains every filter
- * term. Hidden nodes, their labels and their edges are left out entirely. In cluster-to-cluster mode
+ * term; the adjacent-nodes setting can add the neighbors of those matches and limit the edges to the
+ * ones that touch a match. Hidden nodes, their labels and their edges are left out entirely. In cluster-to-cluster mode
  * one edge is drawn per pair of clusters between the centroids of their visible nodes, with a width that
  * grows with the logarithm of the number of class edges it stands for, up to a cap.
  *
@@ -56,6 +57,8 @@ public final class GraphViewBuilder {
     private final int settingsVersion;
     private final AtomicBoolean cancelled;
     private int work;
+    private boolean[] matches = new boolean[0];
+    private boolean edgeEndpointsMustMatch;
 
     public GraphViewBuilder(GraphAssets assets, GraphGlyphAtlas atlas, GraphViewSettings settings, int settingsVersion, AtomicBoolean cancelled) {
         this.assets = assets;
@@ -81,9 +84,14 @@ public final class GraphViewBuilder {
             this.checkCancelled();
             visible[i] = this.isVisible(nodes.get(i), terms);
         }
-        if (this.settings.includeAdjacent() && !terms.isEmpty()) {
-            this.addAdjacent(visible, nodes);
+        // With neighbors shown, "matches" keeps the filter hits apart from the neighbors added for them.
+        boolean[] matches = visible;
+        if (this.settings.adjacentMode().showsAdjacent() && !terms.isEmpty()) {
+            matches = visible.clone();
+            this.addAdjacent(visible, matches, nodes);
         }
+        this.edgeEndpointsMustMatch = this.settings.adjacentMode() == GraphViewSettings.AdjacentMode.MATCH_EDGES && !terms.isEmpty();
+        this.matches = matches;
 
         int[] compact = new int[nodes.size()];
         int visibleCount = 0;
@@ -169,9 +177,8 @@ public final class GraphViewBuilder {
         );
     }
 
-    /** Marks every node that shares an edge with a visible node, unless its cluster is hidden. */
-    private void addAdjacent(boolean[] visible, List<GraphNode> nodes) {
-        boolean[] matches = visible.clone();
+    /** Marks every node that shares an edge with a match, unless its cluster is hidden. */
+    private void addAdjacent(boolean[] visible, boolean[] matches, List<GraphNode> nodes) {
         GraphEdges edges = this.assets.edges();
         for (int e = 0; e < edges.count(); e++) {
             this.checkCancelled();
@@ -184,6 +191,11 @@ public final class GraphViewBuilder {
                 visible[a] = true;
             }
         }
+    }
+
+    /** False for an edge between two neighbors when only edges to the matches are wanted. */
+    private boolean edgeAllowed(int a, int b) {
+        return !this.edgeEndpointsMustMatch || this.matches[a] || this.matches[b];
     }
 
     private boolean isVisible(GraphNode node, List<String> terms) {
@@ -228,7 +240,7 @@ public final class GraphViewBuilder {
             int b = edges.nodeB(e);
             int ca = compact[a];
             int cb = compact[b];
-            if (ca < 0 || cb < 0) {
+            if (ca < 0 || cb < 0 || !this.edgeAllowed(a, b)) {
                 continue;
             }
             GraphNode nodeA = nodes.get(a);
@@ -276,7 +288,7 @@ public final class GraphViewBuilder {
             this.checkCancelled();
             int a = edges.nodeA(e);
             int b = edges.nodeB(e);
-            if (compact[a] < 0 || compact[b] < 0) {
+            if (compact[a] < 0 || compact[b] < 0 || !this.edgeAllowed(a, b)) {
                 continue;
             }
             int sa = slot(slotOf, nodes.get(a).cluster());

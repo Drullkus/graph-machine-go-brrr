@@ -14,21 +14,21 @@ import us.drullk.graphmachine.graph.GraphFilter;
  *
  * <p>This record is immutable; the panel replaces it through {@link GraphSettingsStore}. The first five
  * fields change the drawn graph and start a rebuild, the last two only change the panel.
- * {@code includeAdjacent} keeps every node that shares an edge with a filter match, so a filter for one
- * class shows that class and all of its connections.
+ * {@code adjacentMode} can keep every node that shares an edge with a filter match, so a filter for one
+ * class shows that class and all of its connections, with or without the edges among those neighbors.
  *
  * <p>Written by Claude Code; conversation transcript: {@code llm/transcripts/transcript_2026-10-16_23-43_3d80b42f-de61-4c60-b018-5e44e36d8860.md}.
  */
-public record GraphViewSettings(String filter, boolean includeAdjacent, PackageMode packageMode, EdgeMode edgeMode, IntSet hiddenClusters, int panelWidthPt, boolean panelVisible) {
+public record GraphViewSettings(String filter, AdjacentMode adjacentMode, PackageMode packageMode, EdgeMode edgeMode, IntSet hiddenClusters, int panelWidthPt, boolean panelVisible) {
     public static final int MIN_PANEL_WIDTH_PT = 240;
     public static final int MAX_PANEL_WIDTH_PT = 600;
     public static final int DEFAULT_PANEL_WIDTH_PT = 360;
 
-    public static final GraphViewSettings DEFAULT = new GraphViewSettings("", false, PackageMode.SHOW, EdgeMode.CLUSTERS, IntSets.emptySet(), DEFAULT_PANEL_WIDTH_PT, true);
+    public static final GraphViewSettings DEFAULT = new GraphViewSettings("", AdjacentMode.HIDDEN, PackageMode.SHOW, EdgeMode.CLUSTERS, IntSets.emptySet(), DEFAULT_PANEL_WIDTH_PT, true);
 
     public static final Codec<GraphViewSettings> CODEC = RecordCodecBuilder.create(i -> i.group(
             Codec.STRING.optionalFieldOf("filter", "").forGetter(GraphViewSettings::filter),
-            Codec.BOOL.optionalFieldOf("include_adjacent", false).forGetter(GraphViewSettings::includeAdjacent),
+            AdjacentMode.CODEC.optionalFieldOf("adjacent_nodes", AdjacentMode.HIDDEN).forGetter(GraphViewSettings::adjacentMode),
             PackageMode.CODEC.optionalFieldOf("package_labels", PackageMode.SHOW).forGetter(GraphViewSettings::packageMode),
             EdgeMode.CODEC.optionalFieldOf("edges", EdgeMode.CLUSTERS).forGetter(GraphViewSettings::edgeMode),
             Codec.INT.listOf().optionalFieldOf("hidden_clusters", List.of()).xmap(list -> (IntSet) new IntOpenHashSet(list), set -> set.intStream().sorted().boxed().toList()).forGetter(GraphViewSettings::hiddenClusters),
@@ -42,23 +42,23 @@ public record GraphViewSettings(String filter, boolean includeAdjacent, PackageM
     }
 
     public GraphViewSettings withFilter(String filter) {
-        return new GraphViewSettings(filter, this.includeAdjacent, this.packageMode, this.edgeMode, this.hiddenClusters, this.panelWidthPt, this.panelVisible);
+        return new GraphViewSettings(filter, this.adjacentMode, this.packageMode, this.edgeMode, this.hiddenClusters, this.panelWidthPt, this.panelVisible);
     }
 
-    public GraphViewSettings withIncludeAdjacent(boolean include) {
-        return new GraphViewSettings(this.filter, include, this.packageMode, this.edgeMode, this.hiddenClusters, this.panelWidthPt, this.panelVisible);
+    public GraphViewSettings withAdjacentMode(AdjacentMode mode) {
+        return new GraphViewSettings(this.filter, mode, this.packageMode, this.edgeMode, this.hiddenClusters, this.panelWidthPt, this.panelVisible);
     }
 
     public GraphViewSettings withPackageMode(PackageMode mode) {
-        return new GraphViewSettings(this.filter, this.includeAdjacent, mode, this.edgeMode, this.hiddenClusters, this.panelWidthPt, this.panelVisible);
+        return new GraphViewSettings(this.filter, this.adjacentMode, mode, this.edgeMode, this.hiddenClusters, this.panelWidthPt, this.panelVisible);
     }
 
     public GraphViewSettings withEdgeMode(EdgeMode mode) {
-        return new GraphViewSettings(this.filter, this.includeAdjacent, this.packageMode, mode, this.hiddenClusters, this.panelWidthPt, this.panelVisible);
+        return new GraphViewSettings(this.filter, this.adjacentMode, this.packageMode, mode, this.hiddenClusters, this.panelWidthPt, this.panelVisible);
     }
 
     public GraphViewSettings withHiddenClusters(IntSet hidden) {
-        return new GraphViewSettings(this.filter, this.includeAdjacent, this.packageMode, this.edgeMode, hidden, this.panelWidthPt, this.panelVisible);
+        return new GraphViewSettings(this.filter, this.adjacentMode, this.packageMode, this.edgeMode, hidden, this.panelWidthPt, this.panelVisible);
     }
 
     public GraphViewSettings withClusterHidden(int cluster, boolean hidden) {
@@ -72,21 +72,54 @@ public record GraphViewSettings(String filter, boolean includeAdjacent, PackageM
     }
 
     public GraphViewSettings withPanelWidthPt(int widthPt) {
-        return new GraphViewSettings(this.filter, this.includeAdjacent, this.packageMode, this.edgeMode, this.hiddenClusters, widthPt, this.panelVisible);
+        return new GraphViewSettings(this.filter, this.adjacentMode, this.packageMode, this.edgeMode, this.hiddenClusters, widthPt, this.panelVisible);
     }
 
     public GraphViewSettings withPanelVisible(boolean visible) {
-        return new GraphViewSettings(this.filter, this.includeAdjacent, this.packageMode, this.edgeMode, this.hiddenClusters, this.panelWidthPt, visible);
+        return new GraphViewSettings(this.filter, this.adjacentMode, this.packageMode, this.edgeMode, this.hiddenClusters, this.panelWidthPt, visible);
     }
 
     /** True when the two settings draw the same graph, so no rebuild is needed between them. */
     public boolean sameView(GraphViewSettings other) {
-        return this.filter.equals(other.filter) && this.includeAdjacent == other.includeAdjacent && this.packageMode == other.packageMode && this.edgeMode == other.edgeMode && this.hiddenClusters.equals(other.hiddenClusters);
+        return this.filter.equals(other.filter) && this.adjacentMode == other.adjacentMode && this.packageMode == other.packageMode && this.edgeMode == other.edgeMode && this.hiddenClusters.equals(other.hiddenClusters);
     }
 
     /** The lower-case terms of the filter; a node must contain all of them. */
     public List<String> filterTerms() {
         return GraphFilter.terms(this.filter);
+    }
+
+    /** Whether the neighbors of the filter matches stay visible, and which of their edges draw. */
+    public enum AdjacentMode implements StringRepresentable {
+        HIDDEN("hidden", "Matches only"),
+        ALL_EDGES("all_edges", "Adjacent nodes, all edges"),
+        MATCH_EDGES("match_edges", "Adjacent nodes, edges to matches"),
+        ;
+
+        public static final Codec<AdjacentMode> CODEC = StringRepresentable.fromEnum(AdjacentMode::values);
+        public static final String[] LABELS = java.util.Arrays.stream(values()).map(AdjacentMode::label).toArray(String[]::new);
+
+        private final String name;
+        private final String label;
+
+        AdjacentMode(String name, String label) {
+            this.name = name;
+            this.label = label;
+        }
+
+        @Override
+        public String getSerializedName() {
+            return this.name;
+        }
+
+        public String label() {
+            return this.label;
+        }
+
+        /** True when the neighbors of the matches are shown. */
+        public boolean showsAdjacent() {
+            return this != HIDDEN;
+        }
     }
 
     /** How the package line of a label is shown. */
