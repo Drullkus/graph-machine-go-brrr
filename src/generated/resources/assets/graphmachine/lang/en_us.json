@@ -1,3 +1,5 @@
 {
-  "generator.graphmachine.graph": "Class Graph"
+  "generator.graphmachine.graph": "Class Graph",
+  "key.category.graphmachine.graphmachine": "Graph Machine",
+  "key.graphmachine.toggle_panel": "Toggle Graph Panel"
 }

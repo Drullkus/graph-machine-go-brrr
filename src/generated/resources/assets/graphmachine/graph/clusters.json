@@ -1,0 +1,764 @@
+{
+  "clusters": [
+    {
+      "color": -2670014,
+      "id": 0,
+      "size": 123,
+      "top_packages": [
+        {
+          "package": "net.minecraft.world.level",
+          "share": 0.24
+        },
+        {
+          "package": "net.minecraft.world.inventory",
+          "share": 0.22
+        },
+        {
+          "package": "net.minecraft.world.item",
+          "share": 0.16
+        }
+      ]
+    },
+    {
+      "color": -8874014,
+      "id": 1,
+      "size": 188,
+      "top_packages": [
+        {
+          "package": "net.minecraft.client.renderer",
+          "share": 0.84
+        },
+        {
+          "package": "net.minecraft.client.model",
+          "share": 0.05
+        },
+        {
+          "package": "net.minecraft.world.level",
+          "share": 0.03
+        }
+      ]
+    },
+    {
+      "color": -6695102,
+      "id": 2,
+      "size": 138,
+      "top_packages": [
+        {
+          "package": "com.mojang.realmsclient.dto",
+          "share": 0.3
+        },
+        {
+          "package": "com.mojang.realmsclient.gui",
+          "share": 0.29
+        },
+        {
+          "package": "com.mojang.realmsclient.util",
+          "share": 0.13
+        }
+      ]
+    },
+    {
+      "color": -1935147,
+      "id": 3,
+      "size": 270,
+      "top_packages": [
+        {
+          "package": "net.minecraft.client.renderer",
+          "share": 0.28
+        },
+        {
+          "package": "com.mojang.renderpearl.backend",
+          "share": 0.25
+        },
+        {
+          "package": "com.mojang.renderpearl.api",
+          "share": 0.17
+        }
+      ]
+    },
+    {
+      "color": -12396610,
+      "id": 4,
+      "size": 123,
+      "top_packages": [
+        {
+          "package": "net.minecraft.world.level",
+          "share": 0.76
+        },
+        {
+          "package": "net.minecraft.world.item",
+          "share": 0.11
+        },
+        {
+          "package": "net.minecraft.network.protocol",
+          "share": 0.03
+        }
+      ]
+    },
+    {
+      "color": -1920392,
+      "id": 5,
+      "size": 186,
+      "top_packages": [
+        {
+          "package": "net.minecraft.world.level",
+          "share": 0.66
+        },
+        {
+          "package": "net.minecraft.gametest.framework",
+          "share": 0.18
+        },
+        {
+          "package": "net.minecraft.data.worldgen",
+          "share": 0.11
+        }
+      ]
+    },
+    {
+      "color": -10009897,
+      "id": 6,
+      "size": 77,
+      "top_packages": [
+        {
+          "package": "net.minecraft.world.attribute",
+          "share": 0.31
+        },
+        {
+          "package": "net.minecraft.world.entity",
+          "share": 0.21
+        },
+        {
+          "package": "net.minecraft.world.clock",
+          "share": 0.13
+        }
+      ]
+    },
+    {
+      "color": -8527240,
+      "id": 7,
+      "size": 335,
+      "top_packages": [
+        {
+          "package": "net.minecraft.world.entity",
+          "share": 0.82
+        },
+        {
+          "package": "net.minecraft.world.level",
+          "share": 0.06
+        },
+        {
+          "package": "net.minecraft.world.item",
+          "share": 0.02
+        }
+      ]
+    },
+    {
+      "color": -2669964,
+      "id": 8,
+      "size": 298,
+      "top_packages": [
+        {
+          "package": "net.minecraft.world.level",
+          "share": 0.16
+        },
+        {
+          "package": "net.minecraft.server.packs",
+          "share": 0.14
+        },
+        {
+          "package": "net.minecraft.nbt",
+          "share": 0.11
+        }
+      ]
+    },
+    {
+      "color": -8864798,
+      "id": 9,
+      "size": 239,
+      "top_packages": [
+        {
+          "package": "net.minecraft.world.entity",
+          "share": 0.33
+        },
+        {
+          "package": "net.minecraft.world.item",
+          "share": 0.28
+        },
+        {
+          "package": "net.minecraft.world.level",
+          "share": 0.14
+        }
+      ]
+    },
+    {
+      "color": -3418302,
+      "id": 10,
+      "size": 230,
+      "top_packages": [
+        {
+          "package": "net.minecraft.world.level",
+          "share": 0.89
+        },
+        {
+          "package": "net.minecraft.world.phys",
+          "share": 0.03
+        },
+        {
+          "package": "net.minecraft.world.item",
+          "share": 0.02
+        }
+      ]
+    },
+    {
+      "color": -3376926,
+      "id": 11,
+      "size": 67,
+      "top_packages": [
+        {
+          "package": "net.minecraft.client.resources",
+          "share": 0.36
+        },
+        {
+          "package": "net.minecraft.client.sounds",
+          "share": 0.24
+        },
+        {
+          "package": "com.mojang.blaze3d.audio",
+          "share": 0.16
+        }
+      ]
+    },
+    {
+      "color": -12396660,
+      "id": 12,
+      "size": 92,
+      "top_packages": [
+        {
+          "package": "net.minecraft.world.level",
+          "share": 0.9
+        },
+        {
+          "package": "net.minecraft.util",
+          "share": 0.04
+        },
+        {
+          "package": "net.minecraft.client.gui",
+          "share": 0.02
+        }
+      ]
+    },
+    {
+      "color": -1929608,
+      "id": 13,
+      "size": 179,
+      "top_packages": [
+        {
+          "package": "net.minecraft.advancements.predicates",
+          "share": 0.26
+        },
+        {
+          "package": "net.minecraft.advancements.triggers",
+          "share": 0.25
+        },
+        {
+          "package": "net.minecraft.world.item",
+          "share": 0.18
+        }
+      ]
+    },
+    {
+      "color": -12431657,
+      "id": 14,
+      "size": 214,
+      "top_packages": [
+        {
+          "package": "net.minecraft.world.item",
+          "share": 0.36
+        },
+        {
+          "package": "net.minecraft.client.gui",
+          "share": 0.21
+        },
+        {
+          "package": "net.minecraft.world.inventory",
+          "share": 0.15
+        }
+      ]
+    },
+    {
+      "color": -6233480,
+      "id": 15,
+      "size": 158,
+      "top_packages": [
+        {
+          "package": "net.minecraft.client.renderer",
+          "share": 0.47
+        },
+        {
+          "package": "net.minecraft.client.resources",
+          "share": 0.18
+        },
+        {
+          "package": "net.minecraft.client.data",
+          "share": 0.13
+        }
+      ]
+    },
+    {
+      "color": -2669915,
+      "id": 16,
+      "size": 110,
+      "top_packages": [
+        {
+          "package": "net.minecraft.world.level",
+          "share": 0.85
+        },
+        {
+          "package": "net.minecraft.world.phys",
+          "share": 0.11
+        },
+        {
+          "package": "net.minecraft.util",
+          "share": 0.03
+        }
+      ]
+    },
+    {
+      "color": -8855838,
+      "id": 17,
+      "size": 120,
+      "top_packages": [
+        {
+          "package": "net.minecraft.server.jsonrpc",
+          "share": 0.48
+        },
+        {
+          "package": "net.minecraft.server.players",
+          "share": 0.13
+        },
+        {
+          "package": "net.minecraft.server.rcon",
+          "share": 0.06
+        }
+      ]
+    },
+    {
+      "color": -2641598,
+      "id": 18,
+      "size": 46,
+      "top_packages": [
+        {
+          "package": "net.minecraft.commands.execution",
+          "share": 0.35
+        },
+        {
+          "package": "net.minecraft.commands.functions",
+          "share": 0.13
+        },
+        {
+          "package": "net.minecraft.world.level",
+          "share": 0.13
+        }
+      ]
+    },
+    {
+      "color": -5670686,
+      "id": 19,
+      "size": 304,
+      "top_packages": [
+        {
+          "package": "net.minecraft.network.protocol",
+          "share": 0.67
+        },
+        {
+          "package": "net.minecraft.network",
+          "share": 0.11
+        },
+        {
+          "package": "net.minecraft.server.network",
+          "share": 0.06
+        }
+      ]
+    },
+    {
+      "color": -12396710,
+      "id": 20,
+      "size": 72,
+      "top_packages": [
+        {
+          "package": "net.minecraft.client.model",
+          "share": 0.36
+        },
+        {
+          "package": "net.minecraft.client.renderer",
+          "share": 0.31
+        },
+        {
+          "package": "net.minecraft.client.animation",
+          "share": 0.29
+        }
+      ]
+    },
+    {
+      "color": -1935226,
+      "id": 21,
+      "size": 438,
+      "top_packages": [
+        {
+          "package": "net.minecraft.client.renderer",
+          "share": 0.57
+        },
+        {
+          "package": "net.minecraft.client.model",
+          "share": 0.36
+        },
+        {
+          "package": "net.minecraft.world.entity",
+          "share": 0.02
+        }
+      ]
+    },
+    {
+      "color": -12418857,
+      "id": 22,
+      "size": 154,
+      "top_packages": [
+        {
+          "package": "net.minecraft.world.level",
+          "share": 0.38
+        },
+        {
+          "package": "net.minecraft.data.tags",
+          "share": 0.17
+        },
+        {
+          "package": "net.minecraft.world.entity",
+          "share": 0.16
+        }
+      ]
+    },
+    {
+      "color": -3874184,
+      "id": 23,
+      "size": 20,
+      "top_packages": [
+        {
+          "package": "net.minecraft.util.profiling",
+          "share": 0.9
+        },
+        {
+          "package": "net.minecraft.server.level",
+          "share": 0.05
+        },
+        {
+          "package": "net.minecraft.world.level",
+          "share": 0.05
+        }
+      ]
+    },
+    {
+      "color": -2735401,
+      "id": 24,
+      "size": 36,
+      "top_packages": [
+        {
+          "package": "net.minecraft.util.filefix",
+          "share": 0.92
+        },
+        {
+          "package": "net.minecraft.util.worldupdate",
+          "share": 0.06
+        },
+        {
+          "package": "net.minecraft.client.gui",
+          "share": 0.03
+        }
+      ]
+    },
+    {
+      "color": -8854845,
+      "id": 25,
+      "size": 145,
+      "top_packages": [
+        {
+          "package": "net.minecraft.network.chat",
+          "share": 0.26
+        },
+        {
+          "package": "net.minecraft.client.multiplayer",
+          "share": 0.15
+        },
+        {
+          "package": "net.minecraft.client.gui",
+          "share": 0.14
+        }
+      ]
+    },
+    {
+      "color": -2654398,
+      "id": 26,
+      "size": 135,
+      "top_packages": [
+        {
+          "package": "net.minecraft.world.level",
+          "share": 0.53
+        },
+        {
+          "package": "net.minecraft.server.level",
+          "share": 0.17
+        },
+        {
+          "package": "net.minecraft.util",
+          "share": 0.07
+        }
+      ]
+    },
+    {
+      "color": -8029982,
+      "id": 27,
+      "size": 241,
+      "top_packages": [
+        {
+          "package": "net.minecraft.world.level",
+          "share": 0.72
+        },
+        {
+          "package": "net.minecraft.world.item",
+          "share": 0.16
+        },
+        {
+          "package": "net.minecraft.data.loot",
+          "share": 0.08
+        }
+      ]
+    },
+    {
+      "color": -10758334,
+      "id": 28,
+      "size": 46,
+      "top_packages": [
+        {
+          "package": "net.minecraft.world.item",
+          "share": 0.37
+        },
+        {
+          "package": "net.minecraft.server.commands",
+          "share": 0.2
+        },
+        {
+          "package": "net.minecraft.world.level",
+          "share": 0.17
+        }
+      ]
+    },
+    {
+      "color": -1935191,
+      "id": 29,
+      "size": 188,
+      "top_packages": [
+        {
+          "package": "net.minecraft.client.renderer",
+          "share": 0.36
+        },
+        {
+          "package": "net.minecraft.client.gui",
+          "share": 0.23
+        },
+        {
+          "package": "net.minecraft.util.debug",
+          "share": 0.09
+        }
+      ]
+    },
+    {
+      "color": -12406057,
+      "id": 30,
+      "size": 211,
+      "top_packages": [
+        {
+          "package": "net.minecraft.world.entity",
+          "share": 0.93
+        },
+        {
+          "package": "net.minecraft.network.protocol",
+          "share": 0.01
+        },
+        {
+          "package": "net.minecraft.world.level",
+          "share": 0.01
+        }
+      ]
+    },
+    {
+      "color": -1909128,
+      "id": 31,
+      "size": 177,
+      "top_packages": [
+        {
+          "package": "net.minecraft.world.level",
+          "share": 0.64
+        },
+        {
+          "package": "net.minecraft.data.worldgen",
+          "share": 0.16
+        },
+        {
+          "package": "net.minecraft.util.valueproviders",
+          "share": 0.05
+        }
+      ]
+    },
+    {
+      "color": -6012201,
+      "id": 32,
+      "size": 296,
+      "top_packages": [
+        {
+          "package": "net.minecraft.client.gui",
+          "share": 0.72
+        },
+        {
+          "package": "net.minecraft.client",
+          "share": 0.05
+        },
+        {
+          "package": "com.mojang.blaze3d.platform",
+          "share": 0.04
+        }
+      ]
+    },
+    {
+      "color": -8854880,
+      "id": 33,
+      "size": 93,
+      "top_packages": [
+        {
+          "package": "net.minecraft.server.dialog",
+          "share": 0.33
+        },
+        {
+          "package": "net.minecraft.util.profiling",
+          "share": 0.28
+        },
+        {
+          "package": "net.minecraft.client.gui",
+          "share": 0.15
+        }
+      ]
+    },
+    {
+      "color": -2667198,
+      "id": 34,
+      "size": 55,
+      "top_packages": [
+        {
+          "package": "net.minecraft.client.telemetry",
+          "share": 0.29
+        },
+        {
+          "package": "net.minecraft.util.datafix",
+          "share": 0.29
+        },
+        {
+          "package": "net.minecraft.client.resources",
+          "share": 0.07
+        }
+      ]
+    },
+    {
+      "color": -8876062,
+      "id": 35,
+      "size": 454,
+      "top_packages": [
+        {
+          "package": "net.minecraft.util.datafix",
+          "share": 0.85
+        },
+        {
+          "package": "net.minecraft.util.parsing",
+          "share": 0.06
+        },
+        {
+          "package": "net.minecraft.util.filefix",
+          "share": 0.04
+        }
+      ]
+    },
+    {
+      "color": -7481534,
+      "id": 36,
+      "size": 196,
+      "top_packages": [
+        {
+          "package": "net.minecraft.server.commands",
+          "share": 0.38
+        },
+        {
+          "package": "net.minecraft.commands.arguments",
+          "share": 0.27
+        },
+        {
+          "package": "net.minecraft.network.chat",
+          "share": 0.07
+        }
+      ]
+    },
+    {
+      "color": -1935155,
+      "id": 37,
+      "size": 56,
+      "top_packages": [
+        {
+          "package": "net.minecraft.world.level",
+          "share": 0.46
+        },
+        {
+          "package": "net.minecraft.world.entity",
+          "share": 0.29
+        },
+        {
+          "package": "net.minecraft.gametest.framework",
+          "share": 0.05
+        }
+      ]
+    },
+    {
+      "color": -12396598,
+      "id": 38,
+      "size": 98,
+      "top_packages": [
+        {
+          "package": "net.minecraft.world.level",
+          "share": 0.92
+        },
+        {
+          "package": "net.minecraft.util.valueproviders",
+          "share": 0.06
+        },
+        {
+          "package": "net.minecraft.data.worldgen",
+          "share": 0.01
+        }
+      ]
+    },
+    {
+      "color": -1918344,
+      "id": 39,
+      "size": 115,
+      "top_packages": [
+        {
+          "package": "net.minecraft.client.particle",
+          "share": 0.75
+        },
+        {
+          "package": "net.minecraft.core.particles",
+          "share": 0.15
+        },
+        {
+          "package": "net.minecraft.client.renderer",
+          "share": 0.03
+        }
+      ]
+    }
+  ]
+}

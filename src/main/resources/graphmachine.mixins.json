@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "us.drullk.graphmachine.client.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "client": [
+    "MinecraftMixin",
+    "MouseHandlerMixin",
+    "WindowMixin"
+  ]
+}

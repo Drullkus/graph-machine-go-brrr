@@ -7,12 +7,13 @@ import net.minecraft.util.StringRepresentable;
 /**
  * One top-level Minecraft class and its place in the world.
  *
- * <p>The position is in block units, as written by {@code tools/layout_graph.py}. The chunk generator
- * adds its own vertical offset when it places the node. {@code cluster} is the k-means cluster id, or
- * {@code -1} for a class with no edges. {@code degree} is the number of classes this class references or
- * is referenced by.
+ * <p>The position is the final world position in block units: datagen scales the layout written by
+ * {@code tools/layout_graph.py} and adds the height above the floor. {@code cluster} is the k-means
+ * cluster id, or {@code -1} for a class with no edges. {@code degree} is the number of classes this class
+ * references or is referenced by.
  *
  * <p>Written by Claude Code; conversation transcript: {@code llm/transcripts/transcript_2026-10-16_07-43_2aec7285-4ea5-4d89-ba3e-f516a9a7bde0.md}.
+ * <p>Written by Claude Code; conversation transcript: {@code llm/transcripts/transcript_2026-10-16_23-43_3d80b42f-de61-4c60-b018-5e44e36d8860.md}.
  */
 public record GraphNode(String className, float x, float y, float z, int cluster, Side side, int degree) {
     public static final Codec<GraphNode> CODEC = RecordCodecBuilder.create(i -> i.group(

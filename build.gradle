@@ -27,6 +27,7 @@ sourceSets.main.resources {
 }
 
 // Datagen lives in its own source set, so the jar task never packs it into the mod jar.
+// JUnit tests live in src/test and run through the FML JUnit launcher; they are never packed either.
 sourceSets {
     datagen {
         compileClasspath += sourceSets.main.output
@@ -35,7 +36,8 @@ sourceSets {
 }
 
 repositories {
-    // Add here additional repositories if required by some of the dependencies below.
+    // imgui-java (binding and natives) is published on Maven Central.
+    mavenCentral()
 }
 
 base {
@@ -64,6 +66,15 @@ neoForge {
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
+        // Loads the "Graph Test" save directly and saves a screenshot of the composite (graph plus panel) to
+        // run/screenshots/graphmachine-auto.png a few seconds after the graph appears. For checking the renderer
+        // without touching the game; the save must exist (create it once with the Class Graph preset).
+        clientGraph {
+            client()
+            programArguments.addAll '--quickPlaySingleplayer', 'Graph Test'
+            systemProperty 'graphmachine.autoScreenshot', '8'
+        }
+
         server {
             server()
             programArgument '--nogui'
@@ -84,6 +95,8 @@ neoForge {
             sourceSet = sourceSets.datagen
             // Where the graph data provider reads the CSV files written by tools/layout_graph.py.
             systemProperty 'graphmachine.graphData', file('graph-data').absolutePath
+            // Where the edges provider reads the class edges written by jdeps-minecraft.sh.
+            systemProperty 'graphmachine.jdepsOutput', file('jdeps-output').absolutePath
             // example of overriding the workingDirectory set in configureEach above, uncomment if you want to use it
             // gameDirectory = project.file('run-data')
 
@@ -116,6 +129,12 @@ neoForge {
             sourceSet(sourceSets.datagen)
         }
     }
+
+    unitTest {
+        // JUnit tests in src/test run with Minecraft on the classpath through the FML JUnit launcher.
+        enable()
+        testedMod = mods."${mod_id}"
+    }
 }
 
 // Sets up a dependency configuration called 'localRuntime'.
@@ -124,6 +143,9 @@ neoForge {
 // "optional", meaning it will not be pulled by dependents of this mod.
 configurations {
     runtimeClasspath.extendsFrom localRuntime
+    // The data run uses the datagen source set's classpath, so it needs the libraries of main (imgui-java) too.
+    datagenImplementation.extendsFrom implementation
+    datagenRuntimeOnly.extendsFrom runtimeOnly
 }
 
 dependencies {
@@ -148,6 +170,25 @@ dependencies {
     // For more info:
     // http://www.gradle.org/docs/current/userguide/artifact_dependencies_tutorial.html
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
+
+    // Dear ImGui through imgui-java. The binding and the three native jars are nested into the mod jar (Jar-in-Jar).
+    // Only the binding is used: the mod has its own renderer on Minecraft's GPU abstraction and its own input bridge,
+    // because Minecraft 26.3 uses SDL3 for windowing and either Vulkan or OpenGL for drawing.
+    jarJar(implementation("io.github.spair:imgui-java-binding:${imgui_version}"))
+    jarJar(implementation("io.github.spair:imgui-java-natives-windows:${imgui_version}"))
+    jarJar(implementation("io.github.spair:imgui-java-natives-linux:${imgui_version}"))
+    jarJar(implementation("io.github.spair:imgui-java-natives-macos:${imgui_version}"))
+
+    testImplementation "org.junit.jupiter:junit-jupiter:${junit_version}"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+tasks.named('test', Test).configure {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'failed', 'skipped'
+        exceptionFormat 'full'
+    }
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
