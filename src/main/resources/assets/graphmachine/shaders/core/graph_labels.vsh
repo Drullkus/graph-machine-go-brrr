@@ -7,6 +7,7 @@
 
 // One instance per glyph; the quad comes from gl_VertexIndex (6 vertices).
 // Offsets and sizes are in font pixels: x grows to the right, y grows upward from the label baseline.
+// LineOffset lifts a line's baseline above the node center, in font pixels.
 layout(location = 0) in vec3 NodePos;
 layout(location = 1) in float NodeScale;
 layout(location = 2) in vec2 GlyphOffset;
@@ -28,12 +29,16 @@ void main() {
     // ModelViewMat is the camera rotation only, so its rows are the camera axes in world space.
     vec3 right = vec3(ModelViewMat[0][0], ModelViewMat[1][0], ModelViewMat[2][0]);
     vec3 up = vec3(ModelViewMat[0][1], ModelViewMat[1][1], ModelViewMat[2][1]);
+    vec3 towardCamera = vec3(ModelViewMat[0][2], ModelViewMat[1][2], ModelViewMat[2][2]);
 
+    // The label plane sits just in front of the cube (half its diagonal toward the camera), so it never
+    // cuts through the cube whatever the view angle. Lines are offset along the camera's up axis only.
     float scale = CameraPosScale.w;
     vec2 pixel = GlyphOffset + corner * GlyphSize;
     vec3 relative = NodePos - CameraPosScale.xyz;
     vec3 position = relative
-        + up * (NodeScale * 0.5 + (LineOffset + pixel.y) * scale)
+        + towardCamera * (NodeScale * 0.87 + 0.02)
+        + up * ((LineOffset + pixel.y) * scale)
         + right * (pixel.x * scale);
     gl_Position = ProjMat * ModelViewMat * vec4(position, 1.0);
 

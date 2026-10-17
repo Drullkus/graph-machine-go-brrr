@@ -32,9 +32,9 @@ import us.drullk.graphmachine.graph.GraphNode;
 public final class GraphViewBuilder {
     /** World units per font pixel: the same scale vanilla text displays use. */
     public static final float LABEL_SCALE = 0.025F;
-    /** Font pixels between the cube top and the baseline of the class name line. */
-    public static final float NAME_LINE_OFFSET = 10.0F;
-    /** Font pixels between the cube top and the baseline of the package line. */
+    /** Font pixels between the node center and the baseline of the class name line; the line is centered on the node. */
+    public static final float NAME_LINE_OFFSET = 4.0F;
+    /** Font pixels between the node center and the baseline of the package line, one line above the name. */
     public static final float PACKAGE_LINE_OFFSET = NAME_LINE_OFFSET + GraphGlyphAtlas.LINE_HEIGHT + 1.0F;
 
     private static final int NODE_STRIDE = 20;

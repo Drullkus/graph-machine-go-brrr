@@ -36,7 +36,7 @@ public final class GraphPipelines {
             .addAttribute("NodeColor", GpuFormat.RGBA8_UNORM)
             .build();
 
-    /** One glyph: its node, the node's scale, offset and size in font pixels, atlas UVs, color, line offset. 56 bytes. */
+    /** One glyph: its node, the node's scale (the label floats that far in front of it), offset and size in font pixels, atlas UVs, color, line offset. 56 bytes. */
     public static final VertexFormat LABEL_FORMAT = VertexFormat.builder(1)
             .addAttribute("NodePos", GpuFormat.RGB32_FLOAT)
             .addAttribute("NodeScale", GpuFormat.R32_FLOAT)
