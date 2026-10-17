@@ -66,12 +66,13 @@ neoForge {
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
-        // Loads the "Graph Test" save directly and saves a screenshot of the composite (graph plus panel) to
-        // run/screenshots/graphmachine-auto.png a few seconds after the graph appears. For checking the renderer
-        // without touching the game; the save must exist (create it once with the Class Graph preset).
+        // Loads the "Graph Test" save directly (another name with -Pgraphmachine.save=...) and saves a screenshot
+        // of the composite (graph plus panel) to run/screenshots/graphmachine-auto.png a few seconds after the
+        // graph appears. For checking the renderer without touching the game; the save must exist (create it
+        // once with the Class Graph preset).
         clientGraph {
             client()
-            programArguments.addAll '--quickPlaySingleplayer', 'Graph Test'
+            programArguments.addAll '--quickPlaySingleplayer', (project.findProperty('graphmachine.save') ?: 'Graph Test').toString()
             systemProperty 'graphmachine.autoScreenshot', '8'
         }
 

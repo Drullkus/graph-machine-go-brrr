@@ -57,7 +57,7 @@ The graph is drawn on the client only; the server generates a flat floor and not
 - The world preset `graphmachine:graph` is in `#minecraft:extended`. In the world creation screen, hold Alt while cycling the world type to reach it. Its overworld uses the `graphmachine:graph` dimension type (a copy of the overworld), and that dimension type is how the client knows to draw the graph and show the panel.
 - `GraphAssetsLoader` (client reload listener) loads the three assets. `GraphViewBuilder` runs on a worker thread and compacts the visible nodes, glyphs and edges into instance buffers; `GraphGpuBuffers` uploads them at most 4 MiB per frame into a back buffer set and swaps; `GraphRenderer` draws nodes and labels in `RenderLevelStageEvent.AfterOpaqueBlocks` and edges in `AfterOpaqueFeatures` (the translucent stage event only fires with classic transparency) with one `drawIndirect` per stream (direct draws on devices without indirect support).
 - All geometry comes from `gl_VertexIndex`; the only vertex binding is the per-instance stream at slot 0 with step rate 1. Shaders live in `assets/graphmachine/shaders/core/` and share `include/graphinfo.glsl`, which must match the `Std140Builder` order in `GraphRenderer.writeUniforms`. On macOS OpenGL there is no multi-draw indirect and no base instance, so every draw uses `firstInstance = 0`; sub-ranges are selected with vertex buffer slices.
-- Labels use `GraphGlyphAtlas`: the printable ASCII glyphs of the default font copied out of vanilla's font pages into one `R8_UNORM` texture at the first frame after a resource reload.
+- Labels use `GraphGlyphAtlas`: the printable ASCII glyphs of the default font copied out of vanilla's font pages into one texture at the first frame after a resource reload. The pages are read back to the CPU and the glyph rectangles written with `writeToTexture`, because vanilla's OpenGL `copyTextureToTexture` blits a wrong rectangle for any offset other than the origin. Do not use `copyTextureToTexture` with offsets.
 - `src/main/resources/META-INF/accesstransformer.cfg` opens `Window.refreshFramebufferSize`, `Font.getGlyphSource` and the `BakedSheetGlyph` fields. Add new entries there instead of using reflection.
 
 ## ImGui panel
@@ -70,7 +70,7 @@ The graph is drawn on the client only; the server generates a flat floor and not
 
 ## Checking the renderer without a keyboard
 
-- `./gradlew runClientGraph` quick-plays the save `run/saves/Graph Test` and, 8 seconds after the graph finished applying, writes `run/screenshots/graphmachine-auto.png` with what the window shows (graph plus panel). The save must exist: create a world named `Graph Test` with the Class Graph preset once. Settings for the run can be prepared in `run/config/graphmachine-client.json`.
+- `./gradlew runClientGraph` quick-plays the save `run/saves/Graph Test` (another save with `-Pgraphmachine.save=Name`) and, 8 seconds after the graph finished applying, writes `run/screenshots/graphmachine-auto.png` with what the window shows (graph plus panel). The save must exist: create a world named `Graph Test` with the Class Graph preset once. Settings for the run can be prepared in `run/config/graphmachine-client.json`. The same property also dumps the label atlas to `run/screenshots/graphmachine-atlas.png`.
 
 ## Datagen
 

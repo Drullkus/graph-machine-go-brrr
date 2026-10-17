@@ -220,7 +220,7 @@ public final class GraphRenderer {
         this.draw(pass, buffers, GraphGpuBuffers.Slot.NODES, GraphPipelines.NODES);
 
         GraphGlyphAtlas atlas = this.atlas;
-        if (atlas == null) {
+        if (atlas == null || !atlas.ready()) {
             return;
         }
         pass.setUniform("Sampler0", atlas.view(), RenderSystem.getSamplerCache().getClampToEdge(FilterMode.NEAREST));

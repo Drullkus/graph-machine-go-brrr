@@ -2,10 +2,17 @@ package us.drullk.graphmachine.client.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.renderpearl.api.GpuFormat;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
 import com.mojang.renderpearl.api.commands.CommandEncoder;
 import com.mojang.renderpearl.api.device.GpuDevice;
 import com.mojang.renderpearl.api.textures.GpuTexture;
 import com.mojang.renderpearl.api.textures.GpuTextureView;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GlyphSource;
 import net.minecraft.client.gui.font.glyphs.BakedGlyph;
@@ -45,6 +52,9 @@ public final class GraphGlyphAtlas implements AutoCloseable {
     private final Glyph[] glyphs = new Glyph[LAST_CODEPOINT - FIRST_CODEPOINT + 1];
     private final GpuTexture texture;
     private final GpuTextureView view;
+    private int pendingPages;
+    private boolean ready;
+    private boolean closed;
 
     private GraphGlyphAtlas(GpuTexture texture, GpuTextureView view) {
         this.texture = texture;
@@ -78,11 +88,16 @@ public final class GraphGlyphAtlas implements AutoCloseable {
         return this.texture.getFormat() == GpuFormat.R8_UNORM;
     }
 
+    /** One glyph rectangle to move from a vanilla page into the atlas. */
+    private record Copy(GpuTexture page, int sourceX, int sourceY, int destX, int destY, int width, int height) {
+    }
+
     private void fill(CommandEncoder encoder, GlyphSource source, GpuFormat format) {
         int penX = PADDING;
         int penY = PADDING;
         int rowHeight = 0;
         int skipped = 0;
+        Map<GpuTexture, List<Copy>> copies = new LinkedHashMap<>();
         for (int codepoint = FIRST_CODEPOINT; codepoint <= LAST_CODEPOINT; codepoint++) {
             BakedGlyph baked = source.getGlyph(codepoint);
             float advance = baked.info().getAdvance(false);
@@ -110,7 +125,7 @@ public final class GraphGlyphAtlas implements AutoCloseable {
                 this.glyphs[codepoint - FIRST_CODEPOINT] = new Glyph(advance, 0, 0, 0, 0, 0, 0, 0, 0);
                 continue;
             }
-            encoder.copyTextureToTexture(page, this.texture, 0, penX, penY, sourceX, sourceY, width, height);
+            copies.computeIfAbsent(page, ignored -> new ArrayList<>()).add(new Copy(page, sourceX, sourceY, penX, penY, width, height));
             float nudge = 0.01F;
             this.glyphs[codepoint - FIRST_CODEPOINT] = new Glyph(
                     advance, sheet.left, sheet.right, sheet.up, sheet.down,
@@ -122,6 +137,53 @@ public final class GraphGlyphAtlas implements AutoCloseable {
         if (skipped > 0) {
             GraphMachine.LOGGER.warn("{} ASCII glyphs of the default font could not be copied (not sheet glyphs, or a page of another format); their labels show gaps", skipped);
         }
+        // Vanilla's OpenGL copyTextureToTexture blits a wrong rectangle for any offset other than the origin,
+        // so each page is read back once and the glyph rectangles are written from the CPU instead.
+        this.pendingPages = copies.size();
+        if (this.pendingPages == 0) {
+            this.ready = true;
+            return;
+        }
+        for (Map.Entry<GpuTexture, List<Copy>> entry : copies.entrySet()) {
+            this.readBack(encoder, entry.getKey(), entry.getValue());
+        }
+    }
+
+    private void readBack(CommandEncoder encoder, GpuTexture page, List<Copy> pageCopies) {
+        int pageWidth = page.getWidth(0);
+        int pageHeight = page.getHeight(0);
+        int bytesPerPixel = page.getFormat().blockSize();
+        GpuBuffer buffer = RenderSystem.getDevice().createBuffer(() -> "Graph label page read-back", GpuBuffer.USAGE_MAP_READ | GpuBuffer.USAGE_COPY_DST, (long) pageWidth * pageHeight * bytesPerPixel);
+        encoder.copyTextureToBuffer(page, buffer, 0L, () -> {
+            try (GpuBufferSlice.MappedView read = buffer.map(true, false)) {
+                if (!this.closed) {
+                    CommandEncoder writer = RenderSystem.getDevice().createCommandEncoder();
+                    ByteBuffer pixels = read.data();
+                    for (Copy copy : pageCopies) {
+                        ByteBuffer rect = ByteBuffer.allocateDirect(copy.width() * copy.height() * bytesPerPixel);
+                        for (int row = 0; row < copy.height(); row++) {
+                            int offset = ((copy.sourceY() + row) * pageWidth + copy.sourceX()) * bytesPerPixel;
+                            rect.put(pixels.slice(offset, copy.width() * bytesPerPixel));
+                        }
+                        rect.flip();
+                        writer.writeToTexture(this.texture, rect, 0, 0, copy.destX(), copy.destY(), copy.width(), copy.height());
+                    }
+                }
+            } finally {
+                buffer.close();
+            }
+            if (--this.pendingPages == 0 && !this.closed) {
+                this.ready = true;
+                if (TextureDump.enabled()) {
+                    TextureDump.save(this.texture, "graphmachine-atlas", true);
+                }
+            }
+        }, 0);
+    }
+
+    /** True once every glyph rectangle has arrived in the texture; labels draw only then. */
+    public boolean ready() {
+        return this.ready;
     }
 
     /** The glyph of a codepoint, or null when the atlas has none (anything outside printable ASCII). */
@@ -148,6 +210,7 @@ public final class GraphGlyphAtlas implements AutoCloseable {
 
     @Override
     public void close() {
+        this.closed = true;
         this.view.close();
         this.texture.close();
     }
